@@ -11,9 +11,7 @@
 %% Application callbacks
 -export([start/0, init/0]).
 
--define(HOMECONTROLVM, '[redacted]').
--define(PI, '[redacted]').
--define(MACBOOK, '[redacted]').
+-include("nodes.hrl").
 
 start() -> spawn(?MODULE, init, []).
 
@@ -58,6 +56,10 @@ loop(State = {Music, UniversalRemote, Lights, Schedule}) ->
             light:scene(Lights, Name);
         {light, sequence, Name} ->
             light:sequence(Lights, Name);
+        {airplay, on} ->
+            start_stereo(UniversalRemote, 40, opt2),
+            universal_remote:send_command(UniversalRemote, {hdmi, 4}),
+            universal_remote:send_command(UniversalRemote, {apple_tv, ok});
         {tv, on} ->
             start_stereo(UniversalRemote, 40, opt2),
             universal_remote:send_command(UniversalRemote, {hdmi, 2}),

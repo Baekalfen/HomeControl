@@ -3,9 +3,7 @@
 
 -export([send_command/2, start_link/0, init/1, terminate/2, handle_cast/2, handle_call/3, handle_info/2, code_change/3]).
 
--define(HOMECONTROLVM, '[redacted]').
--define(PI, '[redacted]').
--define(MACBOOK, '[redacted]').
+-include("nodes.hrl").
 
 %%%%%%%
 % Public interface
