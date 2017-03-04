@@ -15,4 +15,4 @@ logs
 _build
 .idea
 rebar.lock
-nodes.hrl
+config.hrl
