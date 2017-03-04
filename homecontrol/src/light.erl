@@ -3,9 +3,7 @@
 
 -export([start_link/0, init/1, terminate/2, handle_cast/2, handle_call/3, handle_info/2, code_change/3, sequence/2, scene/2]).
 
--define (HUE_ADDR, "http://[redacted]/api/").
--define (USERNAME, "[redacted]").
--define (LIGHT_DELAY, 10000).
+-include("config.hrl").
 
 get([], ValOrMap) -> ValOrMap;
 get([H|T], ValOrMap) -> get(T, maps:get(H, ValOrMap, not_found)).
@@ -79,16 +77,16 @@ get_state() ->
         Error -> {error, Error}
     end.
 
-lights_on() ->
-    io:fwrite("lights_on called~n"),
+lights_status() ->
+    io:fwrite("lights_status called~n"),
     case get_state() of
         {ok, Lights} ->
             case get([<<"1">>, <<"state">>, <<"on">>], Lights) and
                  get([<<"2">>, <<"state">>, <<"on">>], Lights) of
-                true -> already_on;
-                false -> proceed
+                true -> {on, undefined};
+                false -> {off, undefined} % fill undefined with exact status
             end;
-        Error -> Error
+        {error, Reason} -> {error, Reason}
     end.
 
 
@@ -105,16 +103,16 @@ set_light(Lamp, Temperature, Brigthness) ->
                    }).
 
 set_scene(on) ->
-    set_attribute(1, #{<<"on">> => true}),
-    set_attribute(2, #{<<"on">> => true});
+    set_attribute("1", #{<<"on">> => true}),
+    set_attribute("2", #{<<"on">> => true});
 set_scene(off) ->
-    set_attribute(1, #{<<"on">> => false}),
-    set_attribute(2, #{<<"on">> => false}).
+    set_attribute("1", #{<<"on">> => false}),
+    set_attribute("2", #{<<"on">> => false}).
 
 run_sequence(wake_up) ->
-    case lights_on() of
-        already_on -> skip;
-        proceed ->
+    case lights_status() of
+        {on, _} -> skip;
+        {off, _} ->
             LTemp = float(454), % Starting temperature (warmest possible)
             LBri = float(1), % Starting brightness
             set_light(all, LTemp, LBri),
@@ -125,7 +123,7 @@ run_sequence(wake_up) ->
             StepTemp = ((TTemp-LTemp)/Iterations),
             StepBri = (TBri-LBri)/Iterations,
             run_sequence(wake_up, LTemp, LBri, StepTemp, StepBri, Iterations, 0);
-        {error, Error} -> io:fwrite("Error: ~p~n", [Error])
+        {error, Reason} -> io:fwrite("Error getting lights status: ~p~n", [Reason])
     end.
 
 run_sequence(wake_up, _, _, _, _, 0, Counter) ->

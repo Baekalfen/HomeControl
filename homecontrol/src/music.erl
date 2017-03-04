@@ -3,7 +3,6 @@
 
 -export([start_link/1, start_link/2, init/1, terminate/2, handle_cast/2, handle_call/3, handle_info/2, code_change/3, turn_on/3, turn_off/1]).
 
--define(CHECK_DELAY, 1000*120).
 
 %%%%%%%
 % Public interface

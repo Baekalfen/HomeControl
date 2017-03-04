@@ -11,7 +11,7 @@
 %% Application callbacks
 -export([start/0, init/0]).
 
--include("nodes.hrl").
+-include("config.hrl").
 
 start() -> spawn(?MODULE, init, []).
 
@@ -36,7 +36,7 @@ loop(State = {Music, UniversalRemote, Lights, Schedule}) ->
             % TODO: Clear previous alarm
             schedule:timer_repeated(Schedule, self(), Action, Hour, Minute);
         {wake_up, light, radio, RadioChannel} ->
-            music:turn_on(Music,RadioChannel),
+            music:turn_on(Music, radio, RadioChannel),
             light:sequence(Lights, wake_up);
         {wake_up, light, tv_delayed} ->
             light:sequence(Lights, wake_up),
@@ -52,6 +52,8 @@ loop(State = {Music, UniversalRemote, Lights, Schedule}) ->
             music:turn_on(Music, youtube, Link);
         {music, off} ->
             music:turn_off(Music);
+        {lights, A, B} ->
+            self() ! {light, A, B};
         {light, scene, Name} ->
             light:scene(Lights, Name);
         {light, sequence, Name} ->

@@ -3,7 +3,7 @@
 
 -export([send_command/2, start_link/0, init/1, terminate/2, handle_cast/2, handle_call/3, handle_info/2, code_change/3]).
 
--include("nodes.hrl").
+-include("config.hrl").
 
 %%%%%%%
 % Public interface
@@ -24,7 +24,6 @@ init([]) ->
         Error -> {error, Error}
     end.
 
-% TODO: Remove old timers
 handle_cast(Request, State = {Arduino, Projector, Radio}) ->
     Self = self(),
     case Request of
@@ -90,7 +89,7 @@ handle_cast(Request, State = {Arduino, Projector, Radio}) ->
     end,
     {noreply, State}.
 
-terminate(_Reason, _State) -> none. % TODO: Clean out schedule
+terminate(_Reason, _State) -> none.
 
 handle_call(_Request, _From, State) -> {noreply, State}.
 
